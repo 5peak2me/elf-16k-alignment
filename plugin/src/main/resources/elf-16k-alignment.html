@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELF 16KB Alignment Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+        .status-pass { color: #10b981; background-color: #ecfdf5; border: 1px solid #10b981; }
+        .status-fail { color: #ef4444; background-color: #fef2f2; border: 1px solid #ef4444; }
+        .card { transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        code { font-family: 'Fira Code', 'Courier New', monospace; }
+        .scale-in { animation: scaleIn 0.2s ease-out; }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="gradient-bg rounded-2xl p-8 mb-8 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10">
+                <h1 class="text-3xl font-bold mb-2">ELF 16KB Alignment Analysis</h1>
+                <p class="text-slate-300 mb-6">Verification of JNI libraries for Android 15 (API 35) 16KB page size compatibility.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 cursor-pointer hover:bg-white/20 transition-all" onclick="setFilter('all')">
+                        <div class="text-sm text-slate-400 uppercase tracking-wider font-semibold">Total Dependencies</div>
+                        <div class="text-3xl font-bold" id="stat-total">0</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 border-l-4 border-emerald-500 cursor-pointer hover:bg-white/20 transition-all" onclick="setFilter('pass')">
+                        <div class="text-sm text-slate-400 uppercase tracking-wider font-semibold">Compliant</div>
+                        <div class="text-3xl font-bold text-emerald-400" id="stat-pass">0</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 border-l-4 border-red-500 cursor-pointer hover:bg-white/20 transition-all" onclick="setFilter('fail')">
+                        <div class="text-sm text-slate-400 uppercase tracking-wider font-semibold">Non-Compliant</div>
+                        <div class="text-3xl font-bold text-red-400" id="stat-fail">0</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Decorative circle -->
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="flex-grow">
+                <label for="searchInput" class="sr-only">Search dependencies or .so files</label>
+                <input type="text" id="searchInput" placeholder="Search dependencies or .so files..."
+                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm">
+            </div>
+            <div class="flex gap-3">
+                <div class="flex-grow md:flex-none">
+                    <label for="filterStatus" class="sr-only">Filter by status</label>
+                    <select id="filterStatus" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white shadow-sm focus:outline-none min-w-[150px]">
+                        <option value="all">All Status</option>
+                        <option value="fail">Non-Compliant Only</option>
+                        <option value="pass">Compliant Only</option>
+                    </select>
+                </div>
+                <div class="flex bg-white rounded-xl border border-slate-200 p-1 shadow-sm">
+                    <button id="lang-zh" onclick="setLanguage('zh')" class="px-3 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white">中</button>
+                    <button id="lang-en" onclick="setLanguage('en')" class="px-3 py-1 rounded-lg text-xs font-bold transition-all text-slate-500 hover:bg-slate-50">EN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- List -->
+        <div id="reportContainer" class="space-y-4">
+            <!-- Items will be injected here -->
+        </div>
+    </div>
+
+    <!-- Details Modal Overlay -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col scale-in">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 id="modalTitle" class="text-xl font-bold text-slate-800 truncate">Library Details</h2>
+                </div>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modalContent" class="p-8 overflow-y-auto">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data placeholder for build-time injection
+        let data = REPLACE_ME;
+        let currentLang = 'zh';
+        let lastRuleResponse = null;
+
+        // 尝试从当前文件路径推断用户主目录
+        const inferredHome = (function() {
+            const path = window.location.pathname.replace(/\\/g, '/');
+            // 匹配 /Users/xxx/ 或 /home/xxx/ 或 C:/Users/xxx/
+            const match = path.match(/^(.*\/Users\/[^\/]+)/i) || path.match(/^(\/home\/[^\/]+)/i);
+            return match ? match[1] : null;
+        })();
+
+        const i18n = {
+            zh: {
+                title: 'ELF 16KB 对齐分析报告',
+                subtitle: '验证 JNI 库对 Android 15 (API 35) 16KB 页大小的兼容性。',
+                statTotal: '总依赖项',
+                statPass: '符合规范',
+                statFail: '不符合规范',
+                filterAll: '全部状态',
+                filterFail: '仅显示不合规',
+                filterPass: '仅显示合规',
+                searchPlaceholder: '搜索依赖或 .so 文件...',
+                colLib: '库名称',
+                colAbi: 'ABI',
+                colAlign: '对齐大小',
+                colRelro: 'GNU_RELRO',
+                colPath: '内部路径',
+                compliant: '符合规范',
+                nonCompliant: '不符合规范',
+                resolution: '解决方案提示',
+                fetching: '正在获取库详情...',
+                noDetails: '未找到详情',
+                noDetailsDesc: '未能从 LibChecker 数据库中找到 {libName} 的详细信息。',
+                contribute: '贡献规则？',
+                networkError: '网络错误',
+                networkErrorDesc: '获取数据失败：{message}。请检查您的网络连接。',
+                modalTitle: '库详情',
+                description: '描述',
+                contributors: '贡献者'
+            },
+            en: {
+                title: 'ELF 16KB Alignment Analysis',
+                subtitle: 'Verification of JNI libraries for Android 15 (API 35) 16KB page size compatibility.',
+                statTotal: 'Total Dependencies',
+                statPass: 'Compliant',
+                statFail: 'Non-Compliant',
+                filterAll: 'All Status',
+                filterFail: 'Non-Compliant Only',
+                filterPass: 'Compliant Only',
+                searchPlaceholder: 'Search dependencies or .so files...',
+                colLib: 'Library Name',
+                colAbi: 'ABI',
+                colAlign: 'Alignment',
+                colRelro: 'GNU_RELRO',
+                colPath: 'Internal Path',
+                compliant: 'Compliant',
+                nonCompliant: 'Non-Compliant',
+                resolution: 'Resolution Hint',
+                fetching: 'Fetching library details...',
+                noDetails: 'No Details Found',
+                noDetailsDesc: "We couldn't find detailed information for {libName} in the LibChecker database.",
+                contribute: 'Contribute this rule?',
+                networkError: 'Network Error',
+                networkErrorDesc: 'Failed to fetch data: {message}. Please check your internet connection.',
+                modalTitle: 'Library Details',
+                description: 'Description',
+                contributors: 'Contributors'
+            }
+        };
+
+        function t(key) { return i18n[currentLang][key]; }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-zh').className = lang === 'zh' ? 'px-3 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white' : 'px-3 py-1 rounded-lg text-xs font-bold transition-all text-slate-500 hover:bg-slate-50';
+            document.getElementById('lang-en').className = lang === 'en' ? 'px-3 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white' : 'px-3 py-1 rounded-lg text-xs font-bold transition-all text-slate-500 hover:bg-slate-50';
+
+            // Update static elements
+            document.querySelector('h1').innerText = t('title');
+            document.querySelector('p.text-slate-300').innerText = t('subtitle');
+            const statLabels = document.querySelectorAll('.uppercase.tracking-wider.font-semibold');
+            statLabels[0].innerText = t('statTotal');
+            statLabels[1].innerText = t('statPass');
+            statLabels[2].innerText = t('statFail');
+
+            document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+            const filter = document.getElementById('filterStatus');
+            filter.options[0].text = t('filterAll');
+            filter.options[1].text = t('filterFail');
+            filter.options[2].text = t('filterPass');
+
+            document.getElementById('modalTitle').innerText = t('modalTitle');
+
+            render();
+            if (lastRuleResponse) renderRuleDetails(lastRuleResponse);
+        }
+
+        function setFilter(val) {
+            const filter = document.getElementById('filterStatus');
+            filter.value = val;
+            render();
+            // Smooth scroll to search input to show results if user was at the top
+            document.getElementById('searchInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        async function init() {
+            // Setup static listeners
+            document.getElementById('searchInput').addEventListener('input', render);
+            document.getElementById('filterStatus').addEventListener('change', render);
+
+            // Set default language
+            setLanguage('zh');
+
+            // Check if data is already injected (as object/array) or needs manual loading
+            if (typeof data !== 'undefined' && Array.isArray(data) && data.length > 0) {
+                render();
+            } else {
+                // If it's the placeholder string or empty, try to fetch external JSON
+                try {
+                    const response = await fetch('elf-16k-alignment.json');
+                    if (response.ok) {
+                        data = await response.json();
+                        render();
+                    } else {
+                        showUploadZone();
+                    }
+                } catch (e) {
+                    showUploadZone();
+                }
+            }
+        }
+
+        function showUploadZone() {
+            document.getElementById('reportContainer').innerHTML = `
+                <div class="p-12 text-center bg-white rounded-2xl shadow-sm border-2 border-dashed border-slate-200" id="dropZone">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-500 rounded-full mb-6">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Load Report Data</h3>
+                    <p class="text-slate-500 max-w-md mx-auto mb-6">
+                        No report data found. Please select <code class="bg-slate-100 px-1 rounded text-pink-600">elf-16k-alignment.json</code> manually.
+                    </p>
+                    <label for="fileInput" class="sr-only">Choose JSON file</label>
+                    <input type="file" id="fileInput" accept=".json" class="hidden">
+                    <button onclick="document.getElementById('fileInput').click()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-200">
+                        Select JSON File
+                    </button>
+                </div>
+            `;
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            if (!dropZone) return;
+
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-400', 'bg-blue-50/50'); });
+            dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-blue-400', 'bg-blue-50/50'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) loadFile(file);
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) loadFile(file);
+        }
+
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    data = JSON.parse(e.target.result);
+                    render();
+                } catch (err) {
+                    alert('Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function render() {
+            if (!Array.isArray(data)) return;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterValue = document.getElementById('filterStatus').value;
+            const container = document.getElementById('reportContainer');
+            container.innerHTML = '';
+
+            let total = 0, passed = 0, failed = 0;
+
+            data.forEach(dep => {
+                const isCompliant = dep.jniLibs.every(lib => lib.align >= 16384);
+
+                // Statistics
+                total++;
+                if (isCompliant) passed++; else failed++;
+
+                // Filters
+                const matchesSearch = dep.name.toLowerCase().includes(searchTerm) ||
+                                    dep.jniLibs.some(lib => lib.name.toLowerCase().includes(searchTerm));
+                const matchesFilter = filterValue === 'all' ||
+                                     (filterValue === 'pass' && isCompliant) ||
+                                     (filterValue === 'fail' && !isCompliant);
+
+                if (!matchesSearch || !matchesFilter) return;
+
+                const card = document.createElement('div');
+                card.className = 'card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden';
+
+                // Group JNI libs by name for rowspan
+                const groupedLibs = [];
+                dep.jniLibs.forEach(lib => {
+                    const existing = groupedLibs.find(g => g.name === lib.name);
+                    if (existing) {
+                        existing.items.push(lib);
+                    } else {
+                        groupedLibs.push({ name: lib.name, items: [lib] });
+                    }
+                });
+
+                const jniTableRows = [];
+                groupedLibs.forEach(group => {
+                    group.items.forEach((lib, index) => {
+                        jniTableRows.push(`
+                            <tr class="border-t border-slate-100">
+                                ${index === 0 ? `<td class="py-3 px-4 text-sm font-medium text-slate-700 border-r border-slate-50 bg-slate-50/30 cursor-pointer hover:text-blue-600 transition-colors group" rowspan="${group.items.length}" onclick="showLibDetails('${lib.name}')" title="Click for details">
+                                    <div class="flex items-center gap-2">
+                                        ${lib.name}
+                                        <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                </td>` : ''}
+                                <td class="py-3 px-4 text-sm text-slate-500">${lib.abi}</td>
+                                <td class="py-3 px-4 text-sm">
+                                    <span class="px-2 py-1 rounded text-xs font-bold ${lib.align >= 16384 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                                        ${lib.align / 1024} KB
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-center">
+                                    ${lib.relro !== undefined ? `
+                                        <div class="inline-flex items-center justify-center ${lib.relro ? 'text-emerald-600' : 'text-red-600'}">
+                                            ${lib.relro ?
+                                                `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>` :
+                                                `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`
+                                            }
+                                        </div>
+                                    ` : '<span class="text-slate-300">-</span>'}
+                                </td>
+                                <td class="py-3 px-4 text-xs text-slate-400 truncate max-w-xs cursor-pointer hover:text-blue-500 hover:underline transition-colors" title="Click to open folder: ${lib.path}" onclick="openFolder('${lib.path.replace(/\\/g, '\\\\')}')">${lib.path}</td>
+                            </tr>
+                        `);
+                    });
+                });
+                const jniTable = jniTableRows.join('');
+
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    ${dep.name}
+                                    <a href="${dep.url}" target="_blank" class="text-blue-500 hover:text-blue-700">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                </h3>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isCompliant ? 'status-pass' : 'status-fail'}">
+                                    ${isCompliant ? t('compliant') : t('nonCompliant')}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-lg border border-slate-100">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="py-2 px-4 text-xs font-semibold text-slate-500 uppercase">${t('colLib')}</th>
+                                        <th class="py-2 px-4 text-xs font-semibold text-slate-500 uppercase">${t('colAbi')}</th>
+                                        <th class="py-2 px-4 text-xs font-semibold text-slate-500 uppercase">${t('colAlign')}</th>
+                                        <th class="py-2 px-4 text-xs font-semibold text-slate-500 uppercase text-center">${t('colRelro')}</th>
+                                        <th class="py-2 px-4 text-xs font-semibold text-slate-500 uppercase">${t('colPath')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${jniTable}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        ${!isCompliant ? `
+                        <div class="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="text-xs font-bold text-slate-400 uppercase mb-2">${t('resolution')}</div>
+                            <div class="flex items-center gap-2">
+                                <code class="text-sm text-pink-600 bg-pink-50 px-2 py-1 rounded flex-grow overflow-x-auto">${dep.cmd}</code>
+                                <button onclick="navigator.clipboard.writeText('${dep.cmd.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-slate-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-pass').innerText = passed;
+            document.getElementById('stat-fail').innerText = failed;
+        }
+
+        // Start loading the data
+        init();
+
+        async function showLibDetails(libName) {
+            const modal = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+
+            title.innerText = libName;
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
+                    <p class="text-slate-500 animate-pulse">${t('fetching')}</p>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+
+            try {
+                const url = `https://raw.githubusercontent.com/LibChecker/LibChecker-Rules/v4/native-libs/${libName}.json`;
+
+                const response = await fetch(url);
+                if (response.ok) {
+                    const rule = await response.json();
+                    lastRuleResponse = rule;
+                    renderRuleDetails(rule);
+                } else {
+                    lastRuleResponse = null;
+                    content.innerHTML = `
+                        <div class="text-center py-12 px-6">
+                            <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-700 mb-2">${t('noDetails')}</h4>
+                            <p class="text-slate-500 max-w-xs mx-auto">${t('noDetailsDesc').replace('{libName}', `<code class="bg-slate-100 px-1 rounded text-pink-600">${libName}</code>`)}</p>
+                            <a href="https://github.com/LibChecker/LibChecker-Rules/new/master/native-libs" target="_blank" class="mt-6 inline-block text-sm text-blue-500 hover:underline">
+                                ${t('contribute')}
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                lastRuleResponse = null;
+                content.innerHTML = `
+                    <div class="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl">
+                        <div class="font-bold mb-1">${t('networkError')}</div>
+                        <p class="text-sm">${t('networkErrorDesc').replace('{message}', e.message)}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRuleDetails(response) {
+            const content = document.getElementById('modalContent');
+            if (!response || !Array.isArray(response.data)) return;
+
+            // Find best locale based on currentLang
+            const locales = response.data;
+            let entry;
+            if (currentLang === 'zh') {
+                entry = locales.find(l => l.locale === 'zh-Hans') ||
+                          locales.find(l => l.locale === 'zh-CN') ||
+                          locales.find(l => l.locale === 'en') ||
+                          locales[0];
+            } else {
+                entry = locales.find(l => l.locale === 'en') ||
+                          locales.find(l => l.locale === 'zh-Hans') ||
+                          locales[0];
+            }
+
+            if (!entry || !entry.data) return;
+            const rule = entry.data;
+
+            const iconUrl = rule.iconUrl || (rule.icon ? `https://raw.githubusercontent.com/LibChecker/LibChecker-Rules/master/resources/${rule.icon}` : null);
+
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-start gap-5">
+                        <div class="flex-shrink-0">
+                            ${iconUrl ?
+                                `<img src="${iconUrl}" class="w-20 h-20 rounded-2xl shadow-md border border-slate-100 bg-white p-2 object-contain" onerror="this.src='https://raw.githubusercontent.com/LibChecker/LibChecker/master/app/src/main/res/drawable/ic_lib.xml'">` :
+                                `<div class="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+                                    <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                                 </div>`
+                            }
+                        </div>
+                        <div class="flex-grow pt-1">
+                            <h3 class="text-2xl font-bold text-slate-900 leading-tight flex items-center gap-2">
+                                ${rule.label}
+                                ${rule.source_link ? `
+                                <a href="${rule.source_link}" target="_blank" class="text-blue-500 hover:text-blue-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                                ` : ''}
+                            </h3>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                                    ${rule.dev_team || 'Third-party Library'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        ${rule.description ? `
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div class="text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">${t('description')}</div>
+                            <p class="text-slate-700 leading-relaxed">${rule.description}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${rule.rule_contributors && rule.rule_contributors.length > 0 ? `
+                    <div class="pt-2">
+                        <div class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">${t('contributors')}</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${rule.rule_contributors.map(c => `
+                                <a href="https://github.com/${c}" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all">
+                                    <img src="https://github.com/${c}.png?size=32" class="w-5 h-5 rounded-full">
+                                    <span class="text-sm font-medium text-slate-600">${c}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function openFolder(path) {
+            const folderPath = path.substring(0, Math.max(path.lastIndexOf('\\'), path.lastIndexOf('/')));
+            // Try to open via file protocol
+            window.open('file:///' + folderPath.replace(/\\/g, '/'), '_blank');
+            // Copy to clipboard as a reliable fallback for manual pasting
+            navigator.clipboard.writeText(folderPath);
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close on background click
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalOverlay');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

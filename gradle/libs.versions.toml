@@ -1,0 +1,44 @@
+[versions]
+agp = "9.2.1"
+kotlin = "2.3.21"
+coreKtx = "1.18.0"
+appcompat = "1.7.1"
+material = "1.13.0"
+composeBom = "2026.05.01"
+map-baidu = "8.0.0"
+
+[libraries]
+android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+# https://central.sonatype.com/artifact/com.amap.api/3dmap-location-search
+map-amap-location-search = { module = "com.amap.api:3dmap-location-search", version = "11.1.001_loc11.1.001_sea9.7.4" }
+
+# https://central.sonatype.com/artifact/com.baidu.lbsyun/BaiduMapSDK_Map
+map-baidu = { module = "com.baidu.lbsyun:BaiduMapSDK_Map", version.ref = "map-baidu" }
+# https://central.sonatype.com/artifact/com.baidu.lbsyun/base
+map-baidu-base = { module = "com.baidu.lbsyun:base", version.ref = "map-baidu" }
+# https://central.sonatype.com/artifact/com.baidu.lbsyun/BaiduMapSDK_Util
+map-baidu-util = { module = "com.baidu.lbsyun:BaiduMapSDK_Util", version.ref = "map-baidu" }
+# https://central.sonatype.com/artifact/com.baidu.lbsyun/BaiduMapSDK_Location
+map-baidu-location = { module = "com.baidu.lbsyun:BaiduMapSDK_Location", version = "9.6.8" }
+
+# https://central.sonatype.com/artifact/com.tencent.map/tencent-map-vector-sdk
+map-tencent = "com.tencent.map:tencent-map-vector-sdk:6.9.0.260312.237cbc9d.205120930"
+# https://central.sonatype.com/artifact/com.tencent.openmap/foundation
+map-tencent-foundation = "com.tencent.openmap:foundation:0.9.0.e5ea763"
+# https://central.sonatype.com/artifact/com.tencent.map/sdk-utilities
+map-tencent-utilities = "com.tencent.map:sdk-utilities:1.0.12"
+# https://central.sonatype.com/artifact/com.tencent.map.geolocation/TencentLocationSdk-openplatform
+map-tencent-geolocation = "com.tencent.map.geolocation:TencentLocationSdk-openplatform:7.6.1.12"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+plugin-publish = { id = "com.gradle.plugin-publish", version = "2.0.0" }
