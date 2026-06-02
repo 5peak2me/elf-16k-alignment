@@ -36,7 +36,7 @@
 ```kotlin
 buildscript {
     dependencies {
-        classpath("io.github.speak2me.gradle:elf-16k-alignment:<version>")
+        classpath("io.github.5peak2me.gradle:elf-16k-alignment:<version>")
     }
 }
 ```
@@ -120,8 +120,7 @@ elfAlignment {
 
 欢迎提交 Issue 和 Pull Request！
 
-- 项目地址: [https://github.com/speak2me/map-compose](https://github.com/speak2me/map-compose)
-- 报告问题: [Issues](https://github.com/speak2me/map-compose/issues)
+- 报告问题: [Issues](https://github.com/5peak2me/elf-16k-alignment/issues)
 
 ## 📄 许可证
 

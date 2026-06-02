@@ -36,7 +36,7 @@ Add the plugin to your root `build.gradle.kts`:
 ```kotlin
 buildscript {
     dependencies {
-        classpath("io.github.speak2me.gradle:elf-16k-alignment:<version>")
+        classpath("io.github.5peak2me.gradle:elf-16k-alignment:<version>")
     }
 }
 ```
@@ -120,8 +120,7 @@ Reports will be generated in `app/build/reports/elf-16k-alignment/<variant>/`.
 
 Welcome to submit Issues and Pull Requests!
 
-- Project: [https://github.com/speak2me/map-compose](https://github.com/speak2me/map-compose)
-- Issues: [Issues](https://github.com/speak2me/map-compose/issues)
+- Issues: [Issues](https://github.com/5peak2me/elf-16k-alignment/issues)
 
 ## 📄 License
 
