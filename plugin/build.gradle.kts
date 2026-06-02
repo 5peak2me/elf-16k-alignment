@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.plugin.compatibility.compatibility
 
 plugins {
     `kotlin-dsl`
@@ -41,12 +42,19 @@ gradlePlugin {
     vcsUrl.set("https://github.com/5peak2me/elf-16k-alignment")
 
     plugins {
-        register("elf-16k-alignment") {
+        create("elf-16k-alignment") {
             id = "io.github.5peak2me.gradle.elf-16k-alignment"
+            implementationClass = "ElfAlignmentPlugin"
+
             displayName = "elf-16k-alignment"
             description = "elf-16k-alignment is a Gradle plugin designed for Android developers to detect whether native libraries (JNI .so files) in project dependencies (AARs) comply with the 16KB page alignment requirement."
             tags.set(listOf("android gradle plugin elf-16k-alignment"))
-            implementationClass = "ElfAlignmentPlugin"
+
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }
