@@ -54,21 +54,26 @@
                 <label for="searchInput" class="sr-only">Search dependencies or .so files</label>
                 <div class="relative">
                     <input type="text" id="searchInput" placeholder="Search dependencies or .so files..."
-                           class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm">
+                           class="w-full px-4 py-3 pr-16 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm">
                     <button type="button" id="clearSearchButton" aria-label="Clear search"
-                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none">
-                        ×
+                            class="hidden absolute right-1 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
                     </button>
                 </div>
             </div>
             <div class="flex gap-3">
-                <div class="flex-grow md:flex-none">
+                <div class="flex-grow md:flex-none relative">
                     <label for="filterStatus" class="sr-only">Filter by status</label>
-                    <select id="filterStatus" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white shadow-sm focus:outline-none min-w-[150px]">
+                    <select id="filterStatus" class="w-full pl-4 pr-10 py-3 rounded-xl border border-slate-200 bg-white shadow-sm focus:outline-none min-w-[150px] appearance-none">
                         <option value="all">All Status</option>
                         <option value="fail">Non-Compliant Only</option>
                         <option value="pass">Compliant Only</option>
                     </select>
+                    <svg class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 9l6 6 6-6"></path>
+                    </svg>
                 </div>
                 <div class="flex bg-white rounded-xl border border-slate-200 p-1 shadow-sm">
                     <button id="lang-zh" onclick="setLanguage('zh')" class="px-3 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white">中</button>
