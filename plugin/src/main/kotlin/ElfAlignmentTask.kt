@@ -123,7 +123,6 @@ internal abstract class ElfAlignmentTask @Inject constructor(
       )
 
       return when {
-        align >= maxAlign -> null
         jni.abi !in abiFilters -> null
         else -> jni
       }
