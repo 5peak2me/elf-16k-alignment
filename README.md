@@ -4,6 +4,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-green.svg)](https://kotlinlang.org)
 [![Gradle](https://img.shields.io/badge/Gradle-9.4.1-green.svg)](https://gradle.org)
 [![AGP](https://img.shields.io/badge/AGP-9.2.1-green.svg)](https://developer.android.com/studio/releases/gradle-plugin)
+[![Configuration Cache](https://img.shields.io/badge/Configuration%20Cache-supported-brightgreen.svg)](https://docs.gradle.org/current/userguide/configuration_cache.html)
 
 English | [中文](README.zh_CN.md)
 
