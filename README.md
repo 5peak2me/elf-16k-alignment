@@ -107,14 +107,14 @@ Reports will be generated in `app/build/reports/elf-16k-alignment/<variant>/`.
 
 ## 🔧 Configuration Parameters
 
-| Parameter | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `maxAlign` | `Long` | `16384L` | Target alignment boundary in bytes. Android 15 recommends 16KB. |
-| `filter` | `Boolean` | `false` | If `true`, libraries that already meet the alignment requirement will be hidden. |
-| `resolveOnBuild` | `Boolean` | `true` | Integration with build lifecycle. If `true`, runs before `mergeNativeLibs`. |
-| `output.csv` | `Boolean` | `false` | Generate CSV report. |
-| `output.html` | `Boolean` | `false` | Generate HTML report. |
-| `output.json` | `Boolean` | `false` | Generate JSON report. |
+| Parameter        | Type      | Default  | Description                                                                      |
+|:-----------------|:----------|:---------|:---------------------------------------------------------------------------------|
+| `maxAlign`       | `Long`    | `16384L` | Target alignment boundary in bytes. Android 15 recommends 16KB.                  |
+| `filter`         | `Boolean` | `false`  | If `true`, libraries that already meet the alignment requirement will be hidden. |
+| `resolveOnBuild` | `Boolean` | `true`   | Integration with build lifecycle. If `true`, runs before `mergeNativeLibs`.      |
+| `output.csv`     | `Boolean` | `false`  | Generate CSV report.                                                             |
+| `output.html`    | `Boolean` | `false`  | Generate HTML report.                                                            |
+| `output.json`    | `Boolean` | `false`  | Generate JSON report.                                                            |
 
 ## 🤝 Contributing & Feedback
 

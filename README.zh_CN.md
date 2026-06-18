@@ -9,11 +9,14 @@
 
 ## 📖 简介
 
-`elf-16k-alignment` 是一个专为 Android 开发者设计的 Gradle 插件，用于检测项目依赖（AAR）中的原生库（JNI `.so` 文件）是否符合 **16KB 页面对齐**要求。
+`elf-16k-alignment` 是一个专为 Android 开发者设计的 Gradle 插件，用于检测项目依赖（AAR）中的原生库（JNI
+`.so` 文件）是否符合 **16KB 页面对齐**要求。
 
-随着 Android 15 开始支持 16KB 页面大小（Page Size），所有包含原生代码的应用必须确保其 ELF 文件按照 16KB 边界对齐，否则应用在 16KB 模式的设备上将无法运行。
+随着 Android 15 开始支持 16KB 页面大小（Page Size），所有包含原生代码的应用必须确保其 ELF 文件按照 16KB
+边界对齐，否则应用在 16KB 模式的设备上将无法运行。
 
-本插件可以自动扫描项目中的所有 AAR 依赖，识别出未对齐的 `.so` 文件，并生成详细的检测报告，帮助开发者快速定位并推动 SDK 供应商进行修复。
+本插件可以自动扫描项目中的所有 AAR 依赖，识别出未对齐的 `.so` 文件，并生成详细的检测报告，帮助开发者快速定位并推动
+SDK 供应商进行修复。
 
 ![Screenshot](assets/screenshot.png)
 
@@ -107,14 +110,14 @@ elfAlignment {
 
 ## 🔧 配置参数说明
 
-| 参数 | 类型 | 默认值 | 说明 |
-| :--- | :--- | :--- | :--- |
-| `maxAlign` | `Long` | `16384L` | 目标对齐边界（字节）。Android 15 建议 16KB。 |
-| `filter` | `Boolean` | `false` | 若设为 `true`，报告中将隐藏已经符合对齐要求的库。 |
-| `resolveOnBuild` | `Boolean` | `true` | 是否挂载到构建生命周期。若为 `true`，会在 `mergeNativeLibs` 任务前执行。 |
-| `output.csv` | `Boolean` | `false` | 是否生成 CSV 格式报告。 |
-| `output.html` | `Boolean` | `false` | 是否生成 HTML 格式报告。 |
-| `output.json` | `Boolean` | `false` | 是否生成 JSON 格式报告。 |
+| 参数               | 类型        | 默认值      | 说明                                                |
+|:-----------------|:----------|:---------|:--------------------------------------------------|
+| `maxAlign`       | `Long`    | `16384L` | 目标对齐边界（字节）。Android 15 建议 16KB。                    |
+| `filter`         | `Boolean` | `false`  | 若设为 `true`，报告中将隐藏已经符合对齐要求的库。                      |
+| `resolveOnBuild` | `Boolean` | `true`   | 是否挂载到构建生命周期。若为 `true`，会在 `mergeNativeLibs` 任务前执行。 |
+| `output.csv`     | `Boolean` | `false`  | 是否生成 CSV 格式报告。                                    |
+| `output.html`    | `Boolean` | `false`  | 是否生成 HTML 格式报告。                                   |
+| `output.json`    | `Boolean` | `false`  | 是否生成 JSON 格式报告。                                   |
 
 ## 🤝 贡献与反馈
 
