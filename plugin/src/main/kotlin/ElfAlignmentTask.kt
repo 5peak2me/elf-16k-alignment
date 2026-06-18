@@ -29,9 +29,6 @@ internal abstract class ElfAlignmentTask @Inject constructor(
   abstract val cmd: Property<String>
 
   @get:Input
-  abstract val filter: Property<Boolean>
-
-  @get:Input
   abstract val maxAlign: Property<Long>
 
   @get:Input
@@ -59,7 +56,6 @@ internal abstract class ElfAlignmentTask @Inject constructor(
     workerExecutor.noIsolation().submit(ElfAlignmentWorkAction::class.java) {
       inputs.set(aarLibs.get())
       cmd.set(this@ElfAlignmentTask.cmd)
-      filter.set(this@ElfAlignmentTask.filter)
       maxAlign.set(this@ElfAlignmentTask.maxAlign)
       abiFilters.set(this@ElfAlignmentTask.abiFilters)
       reportDir.set(this@ElfAlignmentTask.reportDir)
@@ -75,7 +71,6 @@ internal abstract class ElfAlignmentTask @Inject constructor(
     abstract class Parameters : WorkParameters {
       abstract val inputs: MapProperty<String, List<File>>
       abstract val cmd: Property<String>
-      abstract val filter: Property<Boolean>
       abstract val maxAlign: Property<Long>
       abstract val abiFilters: SetProperty<String>
       abstract val reportDir: DirectoryProperty
@@ -90,7 +85,6 @@ internal abstract class ElfAlignmentTask @Inject constructor(
         val jniLibs = libs.mapNotNull { lib ->
           lib.processJniLib(
             parameters.maxAlign.get(),
-            parameters.filter.get(),
             parameters.abiFilters.get()
           )
         }.sortedBy { it.name }
@@ -113,7 +107,6 @@ internal abstract class ElfAlignmentTask @Inject constructor(
 
     private fun File.processJniLib(
       maxAlign: Long,
-      filterEnabled: Boolean,
       abiFilters: Set<String>,
     ): JniLib? {
       val bytes = readBytes()
@@ -130,7 +123,7 @@ internal abstract class ElfAlignmentTask @Inject constructor(
       )
 
       return when {
-        filterEnabled && align >= maxAlign -> null
+        align >= maxAlign -> null
         jni.abi !in abiFilters -> null
         else -> jni
       }

@@ -80,9 +80,6 @@ elfAlignment {
     // Set desired max alignment (default is 16384L / 16KB)
     maxAlign.set(16384L)
     
-    // Whether to filter only unaligned libs in the report (default is false)
-    filter.set(false)
-    
     // Whether to run automatically on every Build (default is true)
     resolveOnBuild.set(true)
     
@@ -110,7 +107,6 @@ Reports will be generated in `app/build/reports/elf-16k-alignment/<variant>/`.
 | Parameter        | Type      | Default  | Description                                                                      |
 |:-----------------|:----------|:---------|:---------------------------------------------------------------------------------|
 | `maxAlign`       | `Long`    | `16384L` | Target alignment boundary in bytes. Android 15 recommends 16KB.                  |
-| `filter`         | `Boolean` | `false`  | If `true`, libraries that already meet the alignment requirement will be hidden. |
 | `resolveOnBuild` | `Boolean` | `true`   | Integration with build lifecycle. If `true`, runs before `mergeNativeLibs`.      |
 | `output.csv`     | `Boolean` | `false`  | Generate CSV report.                                                             |
 | `output.html`    | `Boolean` | `false`  | Generate HTML report.                                                            |

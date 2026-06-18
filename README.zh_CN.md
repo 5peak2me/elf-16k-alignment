@@ -83,9 +83,6 @@ elfAlignment {
     // 设置期望的最大对齐数，默认为 16384 (16KB)
     maxAlign.set(16384L)
 
-    // 是否只在报告中过滤出未对齐的库，默认为 false (显示所有)
-    filter.set(false)
-
     // 是否在每次 Build 时自动运行检测，默认为 true
     resolveOnBuild.set(true)
 
@@ -113,7 +110,6 @@ elfAlignment {
 | 参数               | 类型        | 默认值      | 说明                                                |
 |:-----------------|:----------|:---------|:--------------------------------------------------|
 | `maxAlign`       | `Long`    | `16384L` | 目标对齐边界（字节）。Android 15 建议 16KB。                    |
-| `filter`         | `Boolean` | `false`  | 若设为 `true`，报告中将隐藏已经符合对齐要求的库。                      |
 | `resolveOnBuild` | `Boolean` | `true`   | 是否挂载到构建生命周期。若为 `true`，会在 `mergeNativeLibs` 任务前执行。 |
 | `output.csv`     | `Boolean` | `false`  | 是否生成 CSV 格式报告。                                    |
 | `output.html`    | `Boolean` | `false`  | 是否生成 HTML 格式报告。                                   |

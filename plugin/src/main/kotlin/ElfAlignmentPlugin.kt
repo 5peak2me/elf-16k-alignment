@@ -28,7 +28,6 @@ internal class ElfAlignmentPlugin : Plugin<Project> {
             aarLibs.set(variant.aarLibsWithJNI())
             cmd.set(variant.cmd(project))
             abiFilters.set(variant.abiFilters(project))
-            filter.set(extension.filter)
             maxAlign.set(extension.maxAlign)
             reportDir.set(layout.buildDirectory.dir("reports/$PLUGIN_NAME/${variant.name}"))
 

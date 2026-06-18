@@ -10,11 +10,6 @@ public abstract class ElfAlignmentExtension @Inject constructor(objects: ObjectF
    */
   public val maxAlign: Property<Long> = objects.property(Long::class.java).convention(16384L)
 
-  /**
-   * 过滤未对齐的原生库
-   */
-  public val filter: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
-
   public val resolveOnBuild: Property<Boolean> = objects.property(Boolean::class.java).convention(true)
 
   public val output: ElfAlignmentOutputExtension =
