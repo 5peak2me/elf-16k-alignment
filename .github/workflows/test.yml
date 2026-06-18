@@ -4,7 +4,23 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '.java-version'
+      - '**/*.gradle.kts'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'plugin/**'
+      - 'sample/**'
   pull_request:
+    paths:
+      - '.java-version'
+      - '**/*.gradle.kts'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'plugin/**'
+      - 'sample/**'
   workflow_dispatch:
 
 permissions:

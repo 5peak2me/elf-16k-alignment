@@ -52,8 +52,14 @@
         <div class="flex flex-col md:flex-row gap-4 mb-6">
             <div class="flex-grow">
                 <label for="searchInput" class="sr-only">Search dependencies or .so files</label>
-                <input type="text" id="searchInput" placeholder="Search dependencies or .so files..."
-                       class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search dependencies or .so files..."
+                           class="w-full px-4 py-3 pr-10 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm">
+                    <button type="button" id="clearSearchButton" aria-label="Clear search"
+                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none">
+                        ×
+                    </button>
+                </div>
             </div>
             <div class="flex gap-3">
                 <div class="flex-grow md:flex-none">
@@ -205,9 +211,27 @@
             document.getElementById('searchInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        function updateClearSearchButton() {
+            const searchInput = document.getElementById('searchInput');
+            const clearButton = document.getElementById('clearSearchButton');
+            clearButton.classList.toggle('hidden', searchInput.value.length === 0);
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            updateClearSearchButton();
+            render();
+            searchInput.focus();
+        }
+
         async function init() {
             // Setup static listeners
-            document.getElementById('searchInput').addEventListener('input', render);
+            document.getElementById('searchInput').addEventListener('input', () => {
+                updateClearSearchButton();
+                render();
+            });
+            document.getElementById('clearSearchButton').addEventListener('click', clearSearch);
             document.getElementById('filterStatus').addEventListener('change', render);
 
             // Set default language
