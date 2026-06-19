@@ -5,7 +5,7 @@ coreKtx = "1.19.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 composeBom = "2026.05.01"
-map-baidu = "8.0.0"
+map-baidu = "8.1.0"
 
 [libraries]
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
