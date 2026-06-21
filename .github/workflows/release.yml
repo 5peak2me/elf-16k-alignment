@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '**'
   release:
     types:
       - published
@@ -58,11 +55,14 @@ jobs:
         run: |
           mkdir -p public
           REPORT="$(find sample/app/build/reports/elf-16k-alignment -name elf-16k-alignment.html -print -quit 2>/dev/null || true)"
-          if [ -n "$REPORT" ]; then
-            cp "$REPORT" public/index.html
-          else
-            printf '%s\n' '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>ELF 16K Alignment Report</title></head><body><h1>ELF 16K Alignment Report</h1><p>No HTML report was generated for this release.</p></body></html>' > public/index.html
+          if [ -z "$REPORT" ]; then
+            echo "No HTML report was generated." >&2
+            find sample/app/build/reports -maxdepth 5 -type f -print 2>/dev/null || true
+            exit 1
           fi
+          REPORT_DIR="$(dirname "$REPORT")"
+          cp "$REPORT" public/index.html
+          cp "$REPORT_DIR/elf-16k-alignment.json" public/elf-16k-alignment.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
