@@ -10,7 +10,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: release-${{ github.event.release.tag_name || github.ref_name }}
@@ -20,6 +22,9 @@ jobs:
   publish:
     name: Publish Gradle plugin
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -37,10 +42,56 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
+        run: chmod +x gradlew sample/gradlew
 
       - name: Publish Gradle plugin
         env:
           GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
         run: ./gradlew :plugin:publishPlugins --no-daemon --stacktrace
+
+      - name: Generate HTML report
+        working-directory: sample
+        run: ./gradlew :app:analyzeDebugAlignment --no-daemon --stacktrace
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p public
+          cp sample/app/build/reports/elf-16k-alignment/debug/elf-16k-alignment.html public/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Checkout default branch
+        if: github.event_name != 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Update README version
+        if: github.event_name != 'workflow_dispatch'
+        shell: bash
+        run: |
+          VERSION="${TAG#v}"
+          perl -0pi -e "s/classpath\\(\"io\\.github\\.5peak2me\\.gradle:elf-16k-alignment:[^\"]+\"\\)/classpath(\"io.github.5peak2me.gradle:elf-16k-alignment:${VERSION}\")/g" README.md README.zh_CN.md
+          perl -0pi -e "s/id\\(\"elf-16k-alignment\"\\) version \"[^\"]+\"/id(\"elf-16k-alignment\") version \"${VERSION}\"/g" README.md README.zh_CN.md
+          perl -0pi -e "s/elf-alignment = \\{ id = \"elf-16k-alignment\", version = \"[^\"]+\" \\}/elf-alignment = { id = \"elf-16k-alignment\", version = \"${VERSION}\" }/g" README.md README.zh_CN.md
+        env:
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
+
+      - name: Commit README version
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md README.zh_CN.md
+          git diff --cached --quiet || git commit -m "docs: update README version to ${TAG#v}"
+          git push
+        env:
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
