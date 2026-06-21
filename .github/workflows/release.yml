@@ -65,7 +65,7 @@ jobs:
           cp "$REPORT_DIR/elf-16k-alignment.json" public/elf-16k-alignment.json
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: public
 
