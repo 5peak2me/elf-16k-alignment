@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.5peak2me.plugin.gradle"
-version = "0.0.2"
+version = "0.0.3"
 
 // Configure the build-logic plugins to target JDK 17
 // This matches the JDK used to build the project, and is not related to what is running on device.
