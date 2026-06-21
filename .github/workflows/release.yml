@@ -57,7 +57,12 @@ jobs:
       - name: Prepare Pages artifact
         run: |
           mkdir -p public
-          cp sample/app/build/reports/elf-16k-alignment/debug/elf-16k-alignment.html public/index.html
+          REPORT="$(find sample/app/build/reports/elf-16k-alignment -name elf-16k-alignment.html -print -quit 2>/dev/null || true)"
+          if [ -n "$REPORT" ]; then
+            cp "$REPORT" public/index.html
+          else
+            printf '%s\n' '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>ELF 16K Alignment Report</title></head><body><h1>ELF 16K Alignment Report</h1><p>No HTML report was generated for this release.</p></body></html>' > public/index.html
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
