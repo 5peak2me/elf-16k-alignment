@@ -37,7 +37,7 @@ Add the plugin to your root `build.gradle.kts`:
 ```kotlin
 buildscript {
     dependencies {
-        classpath("io.github.5peak2me.gradle:elf-16k-alignment:0.0.5")
+        classpath("io.github.5peak2me.gradle:elf-16k-alignment:0.0.6")
     }
 }
 ```
@@ -46,7 +46,7 @@ Or using the `plugins` DSL:
 
 ```kotlin
 plugins {
-    id("elf-16k-alignment") version "0.0.5"
+    id("elf-16k-alignment") version "0.0.6"
 }
 ```
 
@@ -56,7 +56,7 @@ In `gradle/libs.versions.toml`:
 
 ```toml
 [plugins]
-elf-alignment = { id = "elf-16k-alignment", version = "0.0.5" }
+elf-alignment = { id = "elf-16k-alignment", version = "0.0.6" }
 ```
 
 And in your root `build.gradle.kts`:

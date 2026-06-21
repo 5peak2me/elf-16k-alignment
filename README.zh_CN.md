@@ -40,7 +40,7 @@ SDK 供应商进行修复。
 ```kotlin
 buildscript {
     dependencies {
-        classpath("io.github.5peak2me.gradle:elf-16k-alignment:0.0.5")
+        classpath("io.github.5peak2me.gradle:elf-16k-alignment:0.0.6")
     }
 }
 ```
@@ -49,7 +49,7 @@ buildscript {
 
 ```kotlin
 plugins {
-    id("elf-16k-alignment") version "0.0.5"
+    id("elf-16k-alignment") version "0.0.6"
 }
 ```
 
@@ -59,7 +59,7 @@ plugins {
 
 ```toml
 [plugins]
-elf-alignment = { id = "elf-16k-alignment", version = "0.0.5" }
+elf-alignment = { id = "elf-16k-alignment", version = "0.0.6" }
 ```
 
 并在项目根目录的 `build.gradle.kts` 中配置：
