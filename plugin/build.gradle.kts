@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.plugin.compatibility.compatibility
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
@@ -30,9 +30,9 @@ fun Provider<PluginDependency>.toDep() = map {
 }
 
 dependencies {
-    compileOnly(libs.android.gradleApiPlugin)
-    compileOnly(libs.kotlin.gradlePlugin)
-    implementation("com.jakewharton.picnic:picnic:0.7.0") {
+    compileOnly(libs.plugins.android.application.toDep())
+    compileOnly(libs.plugins.kotlin.android.toDep())
+    implementation(libs.picnic) {
         exclude("org.jetbrains.kotlin")
     }
 }

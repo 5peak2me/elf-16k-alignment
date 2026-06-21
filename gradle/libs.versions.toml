@@ -8,14 +8,14 @@ composeBom = "2026.06.00"
 map-baidu = "8.1.0"
 
 [libraries]
-android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
-kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+picnic = "com.jakewharton.picnic:picnic:0.7.0"
 
 # https://central.sonatype.com/artifact/com.amap.api/3dmap-location-search
 map-amap-location-search = { module = "com.amap.api:3dmap-location-search", version = "11.2.000_loc11.2.000_sea9.8.0" }
