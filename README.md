@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-green.svg)](https://kotlinlang.org)
-[![Gradle](https://img.shields.io/badge/Gradle-9.4.1-green.svg)](https://gradle.org)
+[![Gradle](https://img.shields.io/badge/Gradle-9.6.0-green.svg)](https://gradle.org)
 [![AGP](https://img.shields.io/badge/AGP-9.2.1-green.svg)](https://developer.android.com/studio/releases/gradle-plugin)
 [![Configuration Cache](https://img.shields.io/badge/Configuration%20Cache-supported-brightgreen.svg)](https://docs.gradle.org/current/userguide/configuration_cache.html)
 
