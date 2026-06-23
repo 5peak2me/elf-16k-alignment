@@ -1,9 +1,8 @@
-# ELF 16K Alignment Gradle Plugin
+# ELF 16K Alignment Gradle Plugin [![Version](https://img.shields.io/gradle-plugin-portal/v/io.github.5peak2me.gradle.elf-16k-alignment?logo=gradle)](https://plugins.gradle.org/plugin/io.github.5peak2me.gradle.elf-16k-alignment)
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-green.svg)](https://kotlinlang.org)
-[![Gradle](https://img.shields.io/badge/Gradle-9.6.0-green.svg)](https://gradle.org)
-[![AGP](https://img.shields.io/badge/AGP-9.2.1-green.svg)](https://developer.android.com/studio/releases/gradle-plugin)
+[![Kotlin](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/5peak2me/elf-16k-alignment-gradle-plugin/main/gradle/libs.versions.toml&query=%24.versions.kotlin&label=Kotlin&color=blue&logo=kotlin)](https://kotlinlang.org)
+[![AGP](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/5peak2me/elf-16k-alignment-gradle-plugin/main/gradle/libs.versions.toml&query=%24.versions.agp&label=AGP&color=blue&logo=android)](https://developer.android.com/build/releases/gradle-plugin)
+[![Gradle](https://img.shields.io/badge/Gradle-9.6.0-green.svg?logo=gradle)](https://gradle.org)
 [![Configuration Cache](https://img.shields.io/badge/Configuration%20Cache-supported-brightgreen.svg)](https://docs.gradle.org/current/userguide/configuration_cache.html)
 
 English | [中文](README.zh_CN.md)
