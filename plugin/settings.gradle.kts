@@ -1,7 +1,6 @@
-rootProject.name = "sample"
+rootProject.name = "plugin"
 
 pluginManagement {
-    includeBuild("..")
     repositories {
         gradlePluginPortal()
         google()
@@ -21,5 +20,3 @@ dependencyResolutionManagement {
         }
     }
 }
-
-include(":app")

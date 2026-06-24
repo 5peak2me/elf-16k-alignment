@@ -1,6 +1,7 @@
 rootProject.name = "elf-16k-alignment"
 
 pluginManagement {
+    includeBuild("plugin")
     repositories {
         gradlePluginPortal()
         google()
@@ -16,4 +17,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":plugin")
+include(":app")
