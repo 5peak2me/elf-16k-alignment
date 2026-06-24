@@ -1,9 +1,11 @@
+import org.gradle.api.tasks.testing.Test
 import org.gradle.plugin.compatibility.compatibility
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
+    alias(libs.plugins.autonomousapps.testkit)
     alias(libs.plugins.plugin.publish)
 }
 
@@ -28,12 +30,22 @@ fun Provider<PluginDependency>.toDep() = map {
     dependencyFactory.create(it.pluginId, "${it.pluginId}.gradle.plugin", it.version.toString())
 }
 
+val pluginTestRuntime by configurations.creating
+
 dependencies {
     compileOnly(libs.plugins.android.application.toDep())
     compileOnly(libs.plugins.kotlin.android.toDep())
     implementation(libs.picnic) {
         exclude("org.jetbrains.kotlin")
     }
+    pluginTestRuntime(libs.plugins.android.application.toDep())
+    testImplementation(libs.plugins.android.application.toDep())
+    testImplementation(gradleTestKit())
+    testImplementation(kotlin("test"))
+
+    functionalTestImplementation(libs.plugins.android.application.toDep())
+    functionalTestImplementation(gradleTestKit())
+    functionalTestImplementation(kotlin("test-junit5"))
 }
 
 gradlePlugin {
@@ -58,7 +70,19 @@ gradlePlugin {
     }
 }
 
+tasks.withType<Test>().configureEach {
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    })
+    if (name == "functionalTest") {
+        useJUnitPlatform()
+    }
+}
+
 tasks {
+    pluginUnderTestMetadata {
+        pluginClasspath.from(pluginTestRuntime)
+    }
     validatePlugins {
         enableStricterValidation = true
         failOnWarning = true
