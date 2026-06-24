@@ -34,7 +34,7 @@ internal fun ApplicationVariant.aarLibsWithJNI(): Map<String, List<File>> {
 
   return runtimeConfiguration.incoming.artifactView {
     attributes.attribute(
-      AndroidArtifacts.ARTIFACT_TYPE,
+      AndroidArtifacts.ARTIFACT_TYPE, // ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE
       AndroidArtifacts.ArtifactType.JNI.type
     )
   }.artifacts.artifacts

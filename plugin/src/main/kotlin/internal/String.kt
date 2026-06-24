@@ -6,7 +6,10 @@ internal val String.yellow
 internal val String.green
   get() = "\u001B[32m$this\u001B[0m"
 
-internal fun String.maven(): String {
+internal fun String.maven(): String? {
+  val parts = split(':')
+  if (parts.size != 3 || parts.any { it.isBlank() || it.any(Char::isWhitespace) }) return null
+
   return when {
     isGoogle() -> "https://maven.google.com/web/index.html#$this"
     isJitpack() -> "https://jitpack.io/#${replace(":", "/").substringBeforeLast("/")}"
