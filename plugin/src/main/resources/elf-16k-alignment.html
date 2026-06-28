@@ -65,6 +65,15 @@
             </div>
             <div class="flex gap-3">
                 <div class="flex-grow md:flex-none relative">
+                    <label for="filterAlign" class="sr-only">Filter by alignment size</label>
+                    <select id="filterAlign" class="w-full pl-4 pr-10 py-3 rounded-xl border border-slate-200 bg-white shadow-sm focus:outline-none min-w-[150px] appearance-none">
+                        <option value="all">All Alignments</option>
+                    </select>
+                    <svg class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 9l6 6 6-6"></path>
+                    </svg>
+                </div>
+                <div class="flex-grow md:flex-none relative">
                     <label for="filterStatus" class="sr-only">Filter by status</label>
                     <select id="filterStatus" class="w-full pl-4 pr-10 py-3 rounded-xl border border-slate-200 bg-white shadow-sm focus:outline-none min-w-[150px] appearance-none">
                         <option value="all">All Status</option>
@@ -132,6 +141,7 @@
                 filterAll: '全部状态',
                 filterFail: '仅显示不合规',
                 filterPass: '仅显示合规',
+                filterAlignAll: '全部对齐大小',
                 searchPlaceholder: '搜索依赖或 .so 文件...',
                 colLib: '库名称',
                 colAbi: 'ABI',
@@ -158,6 +168,7 @@
                 filterAll: 'All Status',
                 filterFail: 'Non-Compliant Only',
                 filterPass: 'Compliant Only',
+                filterAlignAll: 'All Alignments',
                 searchPlaceholder: 'Search dependencies or .so files...',
                 colLib: 'Library Name',
                 colAbi: 'ABI',
@@ -197,6 +208,7 @@
             filter.options[0].text = t('filterAll');
             filter.options[1].text = t('filterFail');
             filter.options[2].text = t('filterPass');
+            document.getElementById('filterAlign').options[0].text = t('filterAlignAll');
 
             document.getElementById('modalTitle').innerText = t('modalTitle');
 
@@ -234,6 +246,7 @@
             });
             document.getElementById('clearSearchButton').addEventListener('click', clearSearch);
             document.getElementById('filterStatus').addEventListener('change', render);
+            document.getElementById('filterAlign').addEventListener('change', render);
 
             // Set default language
             setLanguage('zh');
@@ -311,8 +324,10 @@
 
         function render() {
             if (!Array.isArray(data)) return;
+            updateAlignFilterOptions();
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filterValue = document.getElementById('filterStatus').value;
+            const alignFilterValue = document.getElementById('filterAlign').value;
             const container = document.getElementById('reportContainer');
             container.innerHTML = '';
 
@@ -331,8 +346,10 @@
                 const matchesFilter = filterValue === 'all' ||
                                      (filterValue === 'pass' && isCompliant) ||
                                      (filterValue === 'fail' && !isCompliant);
+                const matchesAlign = alignFilterValue === 'all' ||
+                                     dep.jniLibs.some(lib => String(lib.align) === alignFilterValue);
 
-                if (!matchesSearch || !matchesFilter) return;
+                if (!matchesSearch || !matchesFilter || !matchesAlign) return;
 
                 const card = document.createElement('div');
                 card.className = 'card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden';
@@ -438,6 +455,20 @@
             document.getElementById('stat-total').innerText = total;
             document.getElementById('stat-pass').innerText = passed;
             document.getElementById('stat-fail').innerText = failed;
+        }
+
+        function updateAlignFilterOptions() {
+            const filter = document.getElementById('filterAlign');
+            const currentValue = filter.value;
+            const alignments = [...new Set(data.flatMap(dep => dep.jniLibs.map(lib => lib.align)))]
+                .sort((a, b) => a - b);
+
+            filter.innerHTML = `<option value="all">${t('filterAlignAll')}</option>`;
+            alignments.forEach(align => {
+                filter.insertAdjacentHTML('beforeend', `<option value="${align}">${align / 1024} KB</option>`);
+            });
+
+            filter.value = alignments.some(align => String(align) === currentValue) ? currentValue : 'all';
         }
 
         // Start loading the data

@@ -99,6 +99,19 @@ class OutputTest {
   }
 
   @Test
+  fun `html can filter dependencies by alignment size`() {
+    val content = requireNotNull(
+      javaClass.classLoader.getResource("elf-16k-alignment.html")
+    ).readText()
+
+    assertTrue(content.contains("""<select id="filterAlign""""))
+    assertTrue(content.contains("""document.getElementById('filterAlign').addEventListener('change', render)"""))
+    assertTrue(content.contains("""const matchesAlign = alignFilterValue === 'all' ||"""))
+    assertTrue(content.contains("""dep.jniLibs.some(lib => String(lib.align) === alignFilterValue)"""))
+    assertTrue(content.contains("""updateAlignFilterOptions()"""))
+  }
+
+  @Test
   fun `console output renders compatibility table`() {
     val original = System.out
     val output = ByteArrayOutputStream()
