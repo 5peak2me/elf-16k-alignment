@@ -76,6 +76,29 @@ class OutputTest {
   }
 
   @Test
+  fun `html details dialog uses invoker commands`() {
+    val content = requireNotNull(
+      javaClass.classLoader.getResource("elf-16k-alignment.html")
+    ).readText()
+
+    assertTrue(content.contains("""<dialog id="modalOverlay""""))
+    assertTrue(content.contains("""commandfor="modalOverlay" command="show-modal""""))
+    assertTrue(content.contains("""commandfor="modalOverlay" command="close""""))
+    assertFalse(content.contains("""modal.classList.remove('hidden')"""))
+  }
+
+  @Test
+  fun `html status badge reuses statistic labels`() {
+    val content = requireNotNull(
+      javaClass.classLoader.getResource("elf-16k-alignment.html")
+    ).readText()
+
+    assertTrue(content.contains("""${'$'}{isCompliant ? t('statPass') : t('statFail')}"""))
+    assertFalse(content.contains("compliant:"))
+    assertFalse(content.contains("nonCompliant:"))
+  }
+
+  @Test
   fun `console output renders compatibility table`() {
     val original = System.out
     val output = ByteArrayOutputStream()
